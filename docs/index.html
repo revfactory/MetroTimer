@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MetroTimer — Always On Top</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+  :root {
+    --bg: #0d0d1a;
+    --surface: #1a1a2e;
+    --accent: #e94560;
+    --accent-glow: rgba(233, 69, 96, 0.35);
+    --text: #eeeef4;
+    --muted: #ffffff;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Outfit', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Grid background ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(233,69,96,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(233,69,96,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Noise overlay ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  section, header, footer { position: relative; z-index: 1; }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    padding: 1.2rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(20px);
+    background: rgba(13,13,26,0.7);
+    border-bottom: 1px solid rgba(233,69,96,0.08);
+  }
+
+  .nav-logo {
+    font-family: var(--mono);
+    font-weight: 800;
+    font-size: 1.1rem;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .nav-logo .dot {
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    display: inline-block;
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.7); }
+  }
+
+  .nav-download {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--bg);
+    background: var(--accent);
+    padding: 0.6rem 1.4rem;
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+
+  .nav-download:hover {
+    background: var(--text);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 24px var(--accent-glow);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 8rem 2rem 4rem;
+    position: relative;
+  }
+
+  .hero-badge {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid rgba(233,69,96,0.3);
+    padding: 0.4rem 1.2rem;
+    margin-bottom: 2.5rem;
+    display: inline-block;
+    opacity: 0;
+    animation: fade-up 0.8s 0.2s forwards;
+  }
+
+  .hero h1 {
+    font-family: var(--mono);
+    font-size: clamp(3rem, 8vw, 7rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fade-up 0.8s 0.4s forwards;
+  }
+
+  .hero h1 .accent { color: var(--accent); }
+
+  .hero-sub {
+    font-size: clamp(1rem, 2vw, 1.35rem);
+    font-weight: 300;
+    color: var(--muted);
+    max-width: 480px;
+    line-height: 1.6;
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fade-up 0.8s 0.6s forwards;
+  }
+
+  .hero-timer {
+    font-family: var(--mono);
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 3.5rem;
+    opacity: 0;
+    animation: fade-up 0.8s 0.8s forwards;
+  }
+
+  .hero-timer .cs {
+    font-size: 0.45em;
+    opacity: 0.5;
+    vertical-align: baseline;
+  }
+
+  /* Screenshot */
+  .hero-screenshot {
+    position: relative;
+    opacity: 0;
+    animation: fade-up 0.8s 1s forwards;
+  }
+
+  .hero-screenshot img {
+    width: min(90vw, 660px);
+    border-radius: 16px;
+    box-shadow:
+      0 4px 60px rgba(233,69,96,0.15),
+      0 0 0 1px rgba(233,69,96,0.08);
+    transition: transform 0.4s, box-shadow 0.4s;
+  }
+
+  .hero-screenshot img:hover {
+    transform: scale(1.02) translateY(-4px);
+    box-shadow:
+      0 8px 80px rgba(233,69,96,0.25),
+      0 0 0 1px rgba(233,69,96,0.15);
+  }
+
+  .hero-screenshot::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120%;
+    height: 120%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(ellipse, var(--accent-glow) 0%, transparent 70%);
+    filter: blur(60px);
+    z-index: -1;
+    opacity: 0.4;
+  }
+
+  /* ── FEATURES ── */
+  .features {
+    padding: 8rem 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .features-label {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+
+  .features h2 {
+    font-family: var(--mono);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 4rem;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5px;
+  }
+
+  .feature-card {
+    background: rgba(26,26,46,0.6);
+    border: 1px solid rgba(233,69,96,0.06);
+    padding: 2.5rem 2rem;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 0;
+    background: var(--accent);
+    transition: height 0.4s;
+  }
+
+  .feature-card:hover {
+    background: rgba(26,26,46,0.9);
+    border-color: rgba(233,69,96,0.15);
+  }
+
+  .feature-card:hover::before {
+    height: 100%;
+  }
+
+  .feature-icon {
+    font-size: 1.8rem;
+    margin-bottom: 1.2rem;
+    display: block;
+  }
+
+  .feature-card h3 {
+    font-family: var(--mono);
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 0.7rem;
+  }
+
+  .feature-card p {
+    font-size: 0.9rem;
+    font-weight: 300;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ── SPECS ── */
+  .specs {
+    padding: 6rem 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .specs-label {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+
+  .specs h2 {
+    font-family: var(--mono);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 3rem;
+  }
+
+  .specs-table {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border: 1px solid rgba(233,69,96,0.1);
+  }
+
+  .spec-row {
+    padding: 1.2rem 1.6rem;
+    border-bottom: 1px solid rgba(233,69,96,0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .spec-row:nth-child(odd) {
+    border-right: 1px solid rgba(233,69,96,0.06);
+  }
+
+  .spec-key {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .spec-val {
+    font-family: var(--mono);
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  /* ── CTA ── */
+  .cta {
+    padding: 8rem 2rem;
+    text-align: center;
+    position: relative;
+  }
+
+  .cta::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 500px;
+    height: 500px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+    filter: blur(100px);
+    opacity: 0.2;
+    pointer-events: none;
+  }
+
+  .cta h2 {
+    font-family: var(--mono);
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    margin-bottom: 1.5rem;
+  }
+
+  .cta p {
+    font-weight: 300;
+    color: var(--muted);
+    margin-bottom: 2.5rem;
+    font-size: 1.1rem;
+  }
+
+  .cta-btn {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--bg);
+    background: var(--accent);
+    padding: 1rem 3rem;
+    transition: all 0.25s;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cta-btn:hover {
+    background: var(--text);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 40px var(--accent-glow);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 3rem 2rem;
+    text-align: center;
+    border-top: 1px solid rgba(233,69,96,0.06);
+  }
+
+  footer p {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  footer .heart { color: var(--accent); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.6s, transform 0.6s;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    .specs-table {
+      grid-template-columns: 1fr;
+    }
+    .spec-row:nth-child(odd) {
+      border-right: none;
+    }
+    nav { padding: 1rem; }
+    .features, .specs { padding: 4rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <span class="dot"></span>
+    MetroTimer
+  </div>
+  <a href="#download" class="nav-download">Download</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">macOS Utility</div>
+  <h1>Metro<span class="accent">Timer</span></h1>
+  <p class="hero-sub">
+    데스크탑 위에 항상 떠있는 초정밀 타이머.<br>
+    작업에 집중하면서 시간을 놓치지 마세요.
+  </p>
+  <div class="hero-timer" id="hero-timer">
+    00:00:00<span class="cs">.00</span>
+  </div>
+  <div class="hero-screenshot">
+    <img src="MetroTimer.png" alt="MetroTimer Screenshot" />
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features reveal">
+  <div class="features-label">Features</div>
+  <h2>하나에 집중한 도구</h2>
+  <div class="features-grid">
+    <div class="feature-card">
+      <span class="feature-icon">&#9650;</span>
+      <h3>Always On Top</h3>
+      <p>다른 창 위에 항상 떠있습니다. 모든 데스크탑 스페이스에서 표시되어 어떤 작업 중에도 시간을 확인할 수 있습니다.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">&#9201;</span>
+      <h3>센티초 정밀도</h3>
+      <p>1/100초 단위의 정밀한 시간 측정. HH:MM:SS.cc 포맷으로 시간, 분, 초, 센티초를 한눈에 파악합니다.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">&#9632;</span>
+      <h3>Metro Design</h3>
+      <p>Windows Metro UI에서 영감받은 플랫 디자인. 다크 배경, 볼드 타이포그래피, 강렬한 액센트 컬러.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">&#10024;</span>
+      <h3>Pulse Animation</h3>
+      <p>1분이 경과할 때마다 배경 플래시와 스프링 바운스 애니메이션으로 시간의 흐름을 직관적으로 알려줍니다.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">&#9724;</span>
+      <h3>Compact & Draggable</h3>
+      <p>320x70 픽셀의 컴팩트한 가로형 디자인. 화면 어디든 드래그하여 원하는 위치에 배치하세요.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">&#9678;</span>
+      <h3>Semi-Transparent</h3>
+      <p>반투명 배경으로 뒤의 콘텐츠가 살짝 비쳐 보입니다. 둥근 모서리의 세련된 외관.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SPECS -->
+<section class="specs reveal">
+  <div class="specs-label">Technical Specs</div>
+  <h2>가볍고 빠르게</h2>
+  <div class="specs-table">
+    <div class="spec-row">
+      <span class="spec-key">Platform</span>
+      <span class="spec-val">macOS 13.0+</span>
+    </div>
+    <div class="spec-row">
+      <span class="spec-key">Framework</span>
+      <span class="spec-val">SwiftUI + AppKit</span>
+    </div>
+    <div class="spec-row">
+      <span class="spec-key">Size</span>
+      <span class="spec-val">265 KB</span>
+    </div>
+    <div class="spec-row">
+      <span class="spec-key">Dependencies</span>
+      <span class="spec-val">None</span>
+    </div>
+    <div class="spec-row">
+      <span class="spec-key">Timer Resolution</span>
+      <span class="spec-val">10ms (0.01s)</span>
+    </div>
+    <div class="spec-row">
+      <span class="spec-key">Window</span>
+      <span class="spec-val">320 x 70 pt</span>
+    </div>
+    <div class="spec-row">
+      <span class="spec-key">Accessibility</span>
+      <span class="spec-val">VoiceOver Ready</span>
+    </div>
+    <div class="spec-row">
+      <span class="spec-key">License</span>
+      <span class="spec-val">Free</span>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta" id="download">
+  <h2>시간을 잡아두세요</h2>
+  <p>무료. 가볍고. 빠르게.</p>
+  <a href="#" class="cta-btn">Download for macOS</a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>Built with <span class="heart">&hearts;</span> MetroTimer 2026</p>
+</footer>
+
+<script>
+// ── Live Timer in Hero ──
+(function(){
+  const el = document.getElementById('hero-timer');
+  let start = Date.now();
+  function tick() {
+    const t = (Date.now() - start) / 1000;
+    const h = String(Math.floor(t / 3600)).padStart(2, '0');
+    const m = String(Math.floor((t % 3600) / 60)).padStart(2, '0');
+    const s = String(Math.floor(t % 60)).padStart(2, '0');
+    const cs = String(Math.floor((t * 100) % 100)).padStart(2, '0');
+    el.innerHTML = h + ':' + m + ':' + s + '<span class="cs">.' + cs + '</span>';
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+
+// ── Scroll Reveal ──
+const reveals = document.querySelectorAll('.reveal');
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      obs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.15 });
+reveals.forEach(el => obs.observe(el));
+</script>
+
+</body>
+</html>
