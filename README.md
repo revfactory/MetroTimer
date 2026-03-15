@@ -4,6 +4,13 @@
 
 macOS용 초간단 플로팅 타이머. 메트로 디자인 테마가 적용된 항상 최상단 타이머.
 
+[![Build & Release](https://github.com/revfactory/MetroTimer/actions/workflows/release.yml/badge.svg)](https://github.com/revfactory/MetroTimer/actions/workflows/release.yml)
+[![Latest Release](https://img.shields.io/github/v/release/revfactory/MetroTimer)](https://github.com/revfactory/MetroTimer/releases/latest)
+
+## Download
+
+[Latest Release](https://github.com/revfactory/MetroTimer/releases/latest) 에서 `MetroTimer-*.zip`을 다운로드하세요.
+
 ## Features
 
 - **Always On Top** — 모든 데스크탑 스페이스에서 항상 최상단 표시
@@ -27,9 +34,6 @@ swift run
 
 # Release 빌드
 swift build -c release
-
-# .app 번들은 build/ 디렉토리에 생성
-open build/MetroTimer.app
 ```
 
 ## Xcode
@@ -39,10 +43,27 @@ open build/MetroTimer.app
 open MetroTimer.xcodeproj
 ```
 
+## CI/CD
+
+main 브랜치에 push하면 GitHub Actions가 자동으로:
+
+1. 시맨틱 버전 태그 생성 (커밋 메시지 기반)
+2. `swift build -c release`로 빌드
+3. `.app` 번들 패키징
+4. GitHub Release에 zip 업로드
+
+### 버전 규칙
+
+| 커밋 메시지 | 버전 변경 |
+|------------|----------|
+| `fix:` / 일반 커밋 | patch (v1.0.0 → v1.0.1) |
+| `feat:` | minor (v1.0.0 → v1.1.0) |
+| `BREAKING CHANGE:` | major (v1.0.0 → v2.0.0) |
+
 ## Project Structure
 
 ```
-timer-mac/
+MetroTimer/
 ├── Package.swift
 ├── MetroTimer.xcodeproj/
 ├── Sources/MetroTimer/
@@ -50,30 +71,10 @@ timer-mac/
 │   └── Assets.xcassets/
 ├── Info.plist
 ├── MetroTimer.entitlements
-├── build/MetroTimer.app
+├── .github/workflows/release.yml
 └── docs/index.html
 ```
 
 ## License
 
-MIT License
-
-Copyright (c) 2026
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+[MIT](LICENSE)
