@@ -463,6 +463,123 @@
 
   footer .heart { color: var(--accent); }
 
+  /* ── PRIVACY ── */
+  .privacy {
+    padding: 6rem 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .privacy-label {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+
+  .privacy h2 {
+    font-family: var(--mono);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 2.5rem;
+  }
+
+  .privacy-content {
+    background: rgba(26,26,46,0.6);
+    border: 1px solid rgba(233,69,96,0.1);
+    padding: 2.5rem;
+  }
+
+  .privacy-content p {
+    font-size: 1rem;
+    font-weight: 300;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 1rem;
+  }
+
+  .privacy-content strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .privacy-content em {
+    color: var(--accent);
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  .privacy-content ul {
+    list-style: none;
+    margin: 1.5rem 0;
+    padding: 0;
+  }
+
+  .privacy-content ul li {
+    font-size: 0.95rem;
+    font-weight: 300;
+    color: var(--muted);
+    padding: 0.5rem 0 0.5rem 1.5rem;
+    position: relative;
+    border-bottom: 1px solid rgba(233,69,96,0.06);
+  }
+
+  .privacy-content ul li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    transform: translateY(-50%);
+  }
+
+  .privacy-note {
+    font-size: 0.85rem !important;
+    margin-top: 1.5rem !important;
+  }
+
+  .privacy-note a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(233,69,96,0.3);
+    transition: border-color 0.2s;
+  }
+
+  .privacy-note a:hover {
+    border-color: var(--accent);
+  }
+
+  .privacy-date {
+    font-family: var(--mono);
+    font-size: 0.75rem !important;
+    color: var(--muted) !important;
+    opacity: 0.6;
+    margin-top: 1.5rem !important;
+  }
+
+  .footer-links {
+    margin-top: 0.5rem;
+  }
+
+  .footer-links a {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    transition: color 0.2s;
+  }
+
+  .footer-links a:hover {
+    color: var(--accent);
+  }
+
   /* ── ANIMATIONS ── */
   @keyframes fade-up {
     from { opacity: 0; transform: translateY(30px); }
@@ -610,9 +727,29 @@
   <a href="https://github.com/revfactory/MetroTimer/releases/latest" class="cta-btn">Download for macOS</a>
 </section>
 
+<!-- PRIVACY -->
+<section class="privacy reveal" id="privacy">
+  <div class="privacy-label">Privacy Policy</div>
+  <h2>개인정보 처리방침</h2>
+  <div class="privacy-content">
+    <p><strong>Metro Timer</strong>는 사용자의 개인정보를 소중히 여깁니다.</p>
+    <p>이 앱은 어떠한 사용자 데이터도 <em>수집, 저장, 전송하지 않습니다.</em></p>
+    <ul>
+      <li>개인 식별 정보를 수집하지 않습니다</li>
+      <li>사용 패턴이나 분석 데이터를 추적하지 않습니다</li>
+      <li>네트워크 연결을 사용하지 않습니다</li>
+      <li>제3자에게 어떠한 정보도 공유하지 않습니다</li>
+      <li>광고를 포함하지 않습니다</li>
+    </ul>
+    <p class="privacy-note">본 앱은 타이머 기능만을 수행하며, 모든 데이터는 사용자의 기기에서만 처리됩니다. 문의 사항이 있으시면 <a href="https://github.com/revfactory/MetroTimer/issues">GitHub Issues</a>를 통해 연락해주세요.</p>
+    <p class="privacy-date">시행일: 2026년 3월 16일</p>
+  </div>
+</section>
+
 <!-- FOOTER -->
 <footer>
   <p>Built with <span class="heart">&hearts;</span> MetroTimer 2026</p>
+  <p class="footer-links"><a href="#privacy">개인정보 처리방침</a></p>
 </footer>
 
 <script>
